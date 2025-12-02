@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      # Exposes the web interface on port 5678 of the host
+      - 5678:5678
+    environment:
+      # --- DATA PERSISTENCE & VOLUME ---
+      # Use the volume created in Phase 1
+      - N8N_LOG_LEVEL=info
+
+      # --- CRITICAL SECURITY SETTINGS ---
+      # 1. ENCRYPTION KEY: Used to encrypt ALL your credentials. MUST be a long, random key.
+      #    DO NOT LOSE THIS KEY! Your credentials are useless without it.
+      - N8N_ENCRYPTION_KEY=YOUR_SUPER_LONG_AND_SECURE_ENCRYPTION_KEY_HERE
+
+      # 2. BASIC AUTH (Required for Production/Hosting)
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin-user
+      - N8N_BASIC_AUTH_PASSWORD=Bluebillywiggle123!
+
+      # --- WEBHOOK & HOSTING SETTINGS (Needed for external access) ---
+      # Set this to the external URL/domain where n8n will be accessible.
+      # For local testing, you can leave it as localhost:5678 initially.
+      # When hosting on Render, you MUST change this to your Render domain.
+      - WEBHOOK_URL=http://localhost:5678
+
+      # 3. Timezone
+      - TZ=Europe/Amsterdam # Replace with your local timezone, e.g., America/New_York
+
+    volumes:
+      # Mount the persistent volume from Phase 1 to the container's data directory
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  # Define the named volume (created in Phase 1) for persistence
+  n8n_data:
+    external: true
